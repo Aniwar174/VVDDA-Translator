@@ -56,9 +56,24 @@ jobs:
           sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
           sed -i.bak "s/#p4a.branch = master/p4a.branch = develop/" buildozer.spec
 
-      - name: Prepare Android tools
+      -      - name: Prepare Android tools
         run: |
           buildozer android p4a -- --help
+
+      - name: Install Android Build Tools
+        run: |
+          SDK="$HOME/.buildozer/android/platform/android-sdk"
+          SDKMANAGER="$SDK/tools/bin/sdkmanager"
+
+          echo "Installing Android Build Tools..."
+
+          yes | "$SDKMANAGER" --licenses || true
+
+          "$SDKMANAGER" "platform-tools" "build-tools;35.0.0"
+
+          echo "Checking AIDL..."
+          ls -l "$SDK/build-tools/35.0.0/aidl"
+          "$SDK/build-tools/35.0.0/aidl" --help
 
       - name: Build APK
         run: |
