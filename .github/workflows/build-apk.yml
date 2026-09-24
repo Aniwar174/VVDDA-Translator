@@ -63,10 +63,17 @@ jobs:
           rm -rf "$HOME/.buildozer"
           rm -rf ".buildozer"
 
-      - name: Download Android SDK, NDK and p4a
+      -       - name: SDK, NDK, and p4a download
         run: |
-          buildozer android p4a -- --help
-
+          sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
+          sed -i.bak "s/#p4a.branch = master/p4a.branch = develop/" buildozer.spec
+          yes | buildozer android p4a -- --help
+                - name: Check AIDL
+        run: |
+          echo "Checking for AIDL..."
+          find "$HOME/.buildozer" -type f -name aidl -print
+          echo "Build tools folders:"
+          find "$HOME/.buildozer/android/platform/android-sdk/build-tools" -maxdepth 1 -type d -print
       - name: Build APK
         run: |
           buildozer android debug
