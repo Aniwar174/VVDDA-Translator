@@ -6,12 +6,9 @@ on:
     branches:
       - main
 
-env:
-  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -54,26 +51,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install buildozer cython
 
-      - name: Create Buildozer configuration
-        run: |
-          sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
-
-      - name: Remove old Android environment
-        run: |
-          rm -rf "$HOME/.buildozer"
-          rm -rf ".buildozer"
-
-      -       - name: SDK, NDK, and p4a download
+      - name: Accept Android SDK license
         run: |
           sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
           sed -i.bak "s/#p4a.branch = master/p4a.branch = develop/" buildozer.spec
-          yes | buildozer android p4a -- --help
-                - name: Check AIDL
+
+      - name: Prepare Android tools
         run: |
-          echo "Checking for AIDL..."
-          find "$HOME/.buildozer" -type f -name aidl -print
-          echo "Build tools folders:"
-          find "$HOME/.buildozer/android/platform/android-sdk/build-tools" -maxdepth 1 -type d -print
+          buildozer android p4a -- --help
+
       - name: Build APK
         run: |
           buildozer android debug
